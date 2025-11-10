@@ -52,6 +52,7 @@ A production-ready FastAPI template for building AI agent applications with Lang
 ### Prerequisites
 
 - Python 3.13+
+- [uv](https://github.com/astral-sh/uv) - Fast Python package installer and resolver
 - PostgreSQL 17+ (required for pgvector extension support)
 - Docker and Docker Compose (optional)
 
@@ -64,9 +65,13 @@ git clone <repository-url>
 cd <project-directory>
 ```
 
-2. Create and activate a virtual environment:
+2. Install dependencies using `uv`:
 
 ```bash
+# Install uv if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install project dependencies (uv will create a virtual environment automatically)
 uv sync
 ```
 
@@ -103,10 +108,15 @@ POSTGRES_PASSWORD=postgres
 
 #### Local Development
 
-1. Install dependencies:
+1. Install dependencies using `uv`:
 
 ```bash
 uv sync
+```
+
+**Note**: This project uses [`uv`](https://github.com/astral-sh/uv) for fast Python package management. If you don't have `uv` installed, run:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 2. Run the application:
@@ -432,7 +442,8 @@ whatsapp-food-order/
 ├── docker-compose.yml               # Docker Compose configuration
 ├── Dockerfile                       # Application Docker image
 ├── Makefile                         # Development commands
-├── pyproject.toml                   # Python dependencies
+├── pyproject.toml                   # Python dependencies (managed with uv)
+├── uv.lock                          # Dependency lock file (managed by uv)
 ├── schema.sql                       # Database schema
 ├── SECURITY.md                      # Security policy
 └── README.md                        # This file
