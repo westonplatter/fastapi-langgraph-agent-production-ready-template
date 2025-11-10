@@ -52,7 +52,7 @@ A production-ready FastAPI template for building AI agent applications with Lang
 ### Prerequisites
 
 - Python 3.13+
-- PostgreSQL ([see Database setup](#database-setup))
+- PostgreSQL 17+ (required for pgvector extension support)
 - Docker and Docker Compose (optional)
 
 ### Environment Setup
@@ -81,7 +81,13 @@ cp .env.example .env.[development|staging|production] # e.g. .env.development
 ### Database setup
 
 1. Create a PostgreSQL database (e.g Supabase or local PostgreSQL)
-2. Update the database connection settings in your `.env` file:
+   - **Important**: PostgreSQL 17+ is required for pgvector extension support via Homebrew
+   - For local development, ensure PostgreSQL 17+ is installed and running
+2. Enable the pgvector extension:
+   ```sql
+   CREATE EXTENSION IF NOT EXISTS vector;
+   ```
+3. Update the database connection settings in your `.env` file:
 
 ```bash
 POSTGRES_HOST=db
@@ -252,6 +258,12 @@ RATE_LIMIT_ENABLED=true
 ## 🧠 Long-Term Memory
 
 The application includes a sophisticated long-term memory system powered by mem0ai and pgvector:
+
+### Requirements
+
+- PostgreSQL 17+ (for pgvector extension support)
+- pgvector extension enabled in your database
+- OpenAI API key (for memory processing and embeddings)
 
 ### Features
 

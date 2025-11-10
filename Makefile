@@ -41,6 +41,14 @@ eval-no-report:
 	@echo "Running evaluation without generating report"
 	@bash -c "source scripts/set_env.sh ${ENV:-development} && python -m evals.main --no-report"
 
+chat:
+	@echo "Starting interactive chat CLI"
+	@bash -c "source scripts/set_env.sh ${ENV:-development} && python scripts/chat_cli.py"
+
+chat-quick:
+	@echo "Starting chat CLI with quick login"
+	@bash -c "source scripts/set_env.sh ${ENV:-development} && python scripts/chat_cli.py --email test@example.com --password 'Test123!@#'"
+
 lint:
 	ruff check .
 
@@ -177,6 +185,8 @@ help:
 	@echo "  eval: Run evaluation with interactive mode"
 	@echo "  eval-quick: Run evaluation with default settings"
 	@echo "  eval-no-report: Run evaluation without generating report"
+	@echo "  chat: Start interactive chat CLI"
+	@echo "  chat-quick: Start chat CLI with quick login (test@example.com)"
 	@echo "  test: Run tests"
 	@echo "  clean: Clean up"
 	@echo "  docker-build: Build default Docker image"
