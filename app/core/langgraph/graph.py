@@ -355,11 +355,7 @@ class LangGraphAgent:
         """
         config = {
             "configurable": {"thread_id": session_id},
-            "callbacks": [
-                CallbackHandler(
-                    environment=settings.ENVIRONMENT.value, debug=False, user_id=user_id, session_id=session_id
-                )
-            ],
+            "callbacks": [CallbackHandler()],
             "metadata": {
                 "user_id": user_id,
                 "session_id": session_id,

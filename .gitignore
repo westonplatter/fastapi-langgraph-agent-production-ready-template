@@ -21,3 +21,5 @@ wheels/
 
 # Reports
 evals/reports/
+
+frontend/node_modules

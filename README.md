@@ -165,6 +165,37 @@ The Docker setup includes:
   - Database performance
   - System resource usage
 
+## 👤 User Account Setup
+
+### Default Test Account
+
+For quick testing with the chat CLI (`scripts/chat_cli.py`), use these default credentials:
+
+- **Email:** `test@example.com`
+- **Password:** `Test123!@#`
+
+### Creating a New Account
+
+Register a new user with this curl command:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"your@email.com","password":"YourPass123!"}'
+```
+
+**Password Requirements:** Must include at least 8 characters, one uppercase, one lowercase, one number, and one special character.
+
+**Using the Chat CLI:**
+
+```bash
+# Interactive (press Enter to use defaults)
+uv run python scripts/chat_cli.py
+
+# Or with explicit credentials
+uv run python scripts/chat_cli.py --email test@example.com --password "Test123!@#"
+```
+
 ## 📊 Model Evaluation
 
 The project includes a robust evaluation framework for measuring and tracking model performance over time. The evaluator automatically fetches traces from Langfuse, applies evaluation metrics, and generates detailed reports.

@@ -33,6 +33,19 @@ router = APIRouter()
 agent = LangGraphAgent()
 
 
+def _normalize_stream_chunk(chunk: object) -> str:
+    if isinstance(chunk, list):
+        text_parts: list[str] = []
+        for part in chunk:
+            if isinstance(part, dict):
+                if part.get("type") == "text" and "text" in part:
+                    text_parts.append(str(part.get("text", "")))
+            else:
+                text_parts.append(str(part))
+        return "".join(text_parts)
+    return str(chunk)
+
+
 @router.post("/chat", response_model=ChatResponse)
 @limiter.limit(settings.RATE_LIMIT_ENDPOINTS["chat"][0])
 async def chat(
@@ -112,8 +125,9 @@ async def chat_stream(
                     async for chunk in agent.get_stream_response(
                         chat_request.messages, session.id, user_id=session.user_id
                     ):
-                        full_response += chunk
-                        response = StreamResponse(content=chunk, done=False)
+                        chunk_text = _normalize_stream_chunk(chunk)
+                        full_response += chunk_text
+                        response = StreamResponse(content=chunk_text, done=False)
                         yield f"data: {json.dumps(response.model_dump())}\n\n"
 
                 # Send final message indicating completion
