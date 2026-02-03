@@ -136,11 +136,11 @@ class LangGraphAgent:
                 raise e
         return self._connection_pool
 
-    async def _get_relevant_memory(self, user_id: str, query: str) -> str:
+    async def _get_relevant_memory(self, memory_user_id: str, query: str) -> str:
         """Get the relevant memory for the user and query.
 
         Args:
-            user_id (str): The user ID.
+            memory_user_id (str): The memory user ID (session-scoped).
             query (str): The query to search for.
 
         Returns:
@@ -148,29 +148,39 @@ class LangGraphAgent:
         """
         try:
             memory = await self._long_term_memory()
-            results = await memory.search(user_id=str(user_id), query=query)
+            results = await memory.search(user_id=str(memory_user_id), query=query)
             print(results)
             return "\n".join([f"* {result['memory']}" for result in results["results"]])
         except Exception as e:
-            logger.error("failed_to_get_relevant_memory", error=str(e), user_id=user_id, query=query)
+            logger.error(
+                "failed_to_get_relevant_memory",
+                error=str(e),
+                memory_user_id=memory_user_id,
+                query=query,
+            )
             return ""
 
-    async def _update_long_term_memory(self, user_id: str, messages: list[dict], metadata: dict = None) -> None:
+    async def _update_long_term_memory(
+        self,
+        memory_user_id: str,
+        messages: list[dict],
+        metadata: dict = None,
+    ) -> None:
         """Update the long term memory.
 
         Args:
-            user_id (str): The user ID.
+            memory_user_id (str): The memory user ID (session-scoped).
             messages (list[dict]): The messages to update the long term memory with.
             metadata (dict): Optional metadata to include.
         """
         try:
             memory = await self._long_term_memory()
-            await memory.add(messages, user_id=str(user_id), metadata=metadata)
-            logger.info("long_term_memory_updated_successfully", user_id=user_id)
+            await memory.add(messages, user_id=str(memory_user_id), metadata=metadata)
+            logger.info("long_term_memory_updated_successfully", memory_user_id=memory_user_id)
         except Exception as e:
             logger.exception(
                 "failed_to_update_long_term_memory",
-                user_id=user_id,
+                memory_user_id=memory_user_id,
                 error=str(e),
             )
 
@@ -322,8 +332,9 @@ class LangGraphAgent:
                 "debug": settings.DEBUG,
             },
         }
+        memory_user_id = session_id
         relevant_memory = (
-            await self._get_relevant_memory(user_id, messages[-1].content)
+            await self._get_relevant_memory(memory_user_id, messages[-1].content)
         ) or "No relevant memory found."
         try:
             response = await self._graph.ainvoke(
@@ -333,7 +344,9 @@ class LangGraphAgent:
             # Run memory update in background without blocking the response
             asyncio.create_task(
                 self._update_long_term_memory(
-                    user_id, convert_to_openai_messages(response["messages"]), config["metadata"]
+                    memory_user_id,
+                    convert_to_openai_messages(response["messages"]),
+                    config["metadata"],
                 )
             )
             return self.__process_messages(response["messages"])
@@ -366,8 +379,9 @@ class LangGraphAgent:
         if self._graph is None:
             self._graph = await self.create_graph()
 
+        memory_user_id = session_id
         relevant_memory = (
-            await self._get_relevant_memory(user_id, messages[-1].content)
+            await self._get_relevant_memory(memory_user_id, messages[-1].content)
         ) or "No relevant memory found."
 
         try:
@@ -388,7 +402,9 @@ class LangGraphAgent:
             if state.values and "messages" in state.values:
                 asyncio.create_task(
                     self._update_long_term_memory(
-                        user_id, convert_to_openai_messages(state.values["messages"]), config["metadata"]
+                        memory_user_id,
+                        convert_to_openai_messages(state.values["messages"]),
+                        config["metadata"],
                     )
                 )
         except Exception as stream_error:
